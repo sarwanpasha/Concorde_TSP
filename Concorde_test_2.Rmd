@@ -1,0 +1,101 @@
+
+
+```{r}
+setwd("E:/RA/Pablo Moscato/Code/R Code")
+
+# rm(list=ls()) #Code to clear all variables
+library("TSP")
+library("optrees")
+# install.packages("optrees")
+concordePath = "E:/RA/Pablo Moscato/Concorde_Code/"
+concorde_path(concordePath)
+concorde_help()
+print("done")
+```
+
+```{r main}
+
+dataset_path = "E:/RA/Pablo Moscato/dataset/FHCPCS/"
+# name = "graph1.txt"
+# name = "graph2.txt"
+# name = "graph3.txt"
+# name = "graph4.txt"
+# name = "graph5.txt"
+name = "graph6.txt"
+# name = "graph7.txt"
+# name = "graph8.txt"
+# name = "graph9.txt"
+# name = "graph10.txt"
+dataset = read.table(paste(dataset_path,name,sep = ""))
+# main_function(dataset)
+
+dataset_temp = dataset
+main_function(dataset_temp) #without Single Edge Deletion
+
+# for(i in 1:length(dataset[,1])){
+#   print(paste(i,"###############################################"))
+#   dataset_temp_2 = dataset_temp[-i,] #Single Edge Deletion
+#   main_function(dataset_temp_2)
+#   if(i==30||i==60||i==90||i==120||i==150||i==180||i==210||i==240){
+#     Sys.sleep(10)
+#   }
+# }
+
+
+main_function = function(dataset){
+# create graph
+g <- graph_from_edgelist(as.matrix(dataset))
+# plot(g)
+
+# arr=dataset
+# data = standard_reduction(dataset)
+data = transitive_closure(dataset)
+# data = arr_mat_new
+# temp = 1/(1+data)
+# tsp_orig <- TSP(temp)
+atsp_orig <- ATSP(data)
+
+tsp <- reformulate_ATSP_as_TSP(atsp_orig, infeasible = Inf, cheap = 0)
+## run concorde only with fast cuts (-V)
+
+o <- solve_TSP(tsp, method="concorde",rep=10, control = list(clo = "-V"))
+
+# tour_length(o)
+# as.integer(o)
+# labels(o)
+# plot(o)
+# image(atsp, o)
+}
+```
+
+```{r functions}
+standard_reduction = function(edgelist_array){
+  arr = edgelist_array
+  nodelist = unique(as.vector(as.matrix(arr)))
+  arr_mat = matrix(0,length(nodelist),length(nodelist))
+  for (i in 1:length(arr[,1])){
+    arr_mat[arr[i,1],arr[i,2]] = 1
+  }
+  arr_mat_new = arr_mat
+  for(i in 1:length(arr_mat[,1])){
+    arr_mat_new[i,which(arr_mat[i,]==0)] = 2
+  }
+  return(arr_mat_new)
+}
+
+transitive_closure = function(edgelist_array){
+  arr = edgelist_array
+  nodelist = unique(as.vector(as.matrix(arr)))
+  arr_mat = matrix(0,length(nodelist),length(nodelist))
+  for (i in 1:length(arr[,1])){
+    arr_mat[arr[i,1],arr[i,2]] = 1
+  }
+  g <- graph.adjacency(arr_mat, weighted=TRUE)
+  arr_mat_new <- shortest.paths(g, algorithm = "dijkstra")
+  # diag(arr_mat_new)
+  
+  return(arr_mat_new)
+}
+```
+
+
