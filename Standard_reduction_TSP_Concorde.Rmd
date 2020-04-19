@@ -1,0 +1,46 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r main_Orig}
+dataset_path = "E:/RA/Pablo Moscato/dataset/FHCPCS/"
+
+############################# hcp dataset reading logic #####################################
+itter = 1
+for (q in 1:itter){
+  q=11
+  print(paste("Iteration Number: ",q))
+  # name = "graph1.hcp"
+  name = paste("graph",q,".hcp",sep = "")
+  file_name = paste(dataset_path,name,sep = "")
+  # dataset_hcp = read.table(file_name, header = FALSE, sep = "", dec = ".")
+  dataset_hcp = read.delim(file_name)
+  dataset_hcp = dataset_hcp[-c(1:5),]
+  dataset_hcp_2 = data.frame(dataset_hcp)
+  dataset_hcp_2 = data.frame(dataset_hcp_2[-c((nrow(dataset_hcp_2)-1):(nrow(dataset_hcp_2))),])
+  colnames(dataset_hcp_2)<-"x1"
+  dataset <- separate(data = dataset_hcp_2, col = x1, into = c("x1", "x2"), sep = "\\ ")
+  
+    ########################## Concorde Logic Starts Here #########################
+  # dataset <- adj_new_final
+  final_edgelist = dataset
+  
+  
+  g2 <- graph_from_edgelist(as.matrix(final_edgelist),directed = FALSE)
+  plot(g2, main = name)
+  d <- (1/as_adjacency_matrix(g2, sparse = FALSE))-1
+  d[d==Inf] = 3.99990099
+  d[d<3.99990099] = 0
+  tsp <- TSP(d)
+  # o2 <- solve_TSP(tsp, method="concorde",rep=10, control = list(clo = "-V"))
+  o3 <- solve_TSP(tsp, method="concorde",rep=10)
+  print(o3)
+  
+  # as.integer(o3)
+}
+########################## Concorde Logic Ends Here #########################
+
+```
